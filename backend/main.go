@@ -75,7 +75,7 @@ func expand(w http.ResponseWriter, r *http.Request) {
     shorturl := chi.URLParam(r, "url")
 
     longcode := shortener.expandURL(shorturl)
-    w.Write([]byte(longcode))
+    http.Redirect(w, r, longcode, http.StatusSeeOther)
     
 }
 
