@@ -1,0 +1,17 @@
+FROM golang:1.20 AS build
+
+WORKDIR /app
+
+COPY . .
+
+RUN go mod tidy
+
+RUN env GOOS=linux GOARCH=amd64 go build -o picori
+
+FROM debian:latest
+
+WORKDIR /app
+
+COPY --from=build /app/picori .
+
+CMD ["./picori"]
