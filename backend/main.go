@@ -58,10 +58,10 @@ func redirect(w http.ResponseWriter, r *http.Request) {
 
 func main() {
     dsn := fmt.Sprintf("host=%s user=%s password=%s port=%s", 
-                        os.Getenv("PICORI_HOST"), 
-                        os.Getenv("PICORI_USER"), 
-                        os.Getenv("PICORI_PASSWORD"), 
-                        os.Getenv("PICORI_PORT"))
+                        os.Getenv("DB_HOST"), 
+                        os.Getenv("DB_USER"), 
+                        os.Getenv("DB_PASSWORD"), 
+                        os.Getenv("DB_PORT"))
     var err error
     db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
@@ -77,5 +77,6 @@ func main() {
     r.Post("/shorten", shorten)
     r.Get("/{url}", redirect)
 
-    http.ListenAndServe(":3001", r)
+    port := fmt.Sprintf(":%s", os.Getenv("PICORI_PORT"))
+    http.ListenAndServe(port, r)
 }
