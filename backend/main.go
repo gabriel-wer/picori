@@ -7,12 +7,10 @@ import (
 	"net/http"
 	"os"
 	"strings"
-
 	"database/sql"
-
+	_ "github.com/lib/pq"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	_ "github.com/lib/pq"
 )
 
 var db *sql.DB;
