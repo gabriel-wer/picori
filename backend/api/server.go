@@ -65,7 +65,8 @@ func (s *Server) handleShorten(w http.ResponseWriter, r *http.Request) {
 
     jsonData, err := json.Marshal(url)
     if err != nil{ 
-        fmt.Println("Error: ", err)
+        w.Write([]byte("Cannot unmarshall URL JSON"))
+        http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
 
