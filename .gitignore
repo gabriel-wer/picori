@@ -22,7 +22,8 @@ go.work
 
 #test files
 rest/
-<<<<<<< HEAD
 
 #go air files
 /backend/tmp/
+
+env
