@@ -1,24 +1,13 @@
 version: '0.1'
 
 services:
-  front:
-    image: nginx
-    restart: always
-    volumes:
-      - ./frontend/:/usr/share/nginx/html
-    environment:
-      - NGINX_PORT=80
-    ports:
-      - 80:80
-    networks:
-      - backend
   server:
     restart: always
     build:
-      context: ./backend/
+      context: ./
       dockerfile: dockerfile
     volumes:
-      - ./backend/:/app
+      - ./:/app
     environment:
       DB_USER: 'picori'
       DB_PASSWORD: 'yourpassword'
