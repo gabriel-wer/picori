@@ -24,6 +24,6 @@ go.work
 rest/
 
 #go air files
-/backend/tmp/
+tmp/
 
 env
