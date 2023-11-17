@@ -5,6 +5,6 @@ import (
 )
 
 type Storage interface {
-    GetURL(*types.URL)
+    GetURL(*types.URL) error
     InsertURL(types.URL) error
 }

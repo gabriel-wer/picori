@@ -14,6 +14,6 @@ func main() {
         }
     }()
 
-    server := api.NewServer(":3000", store)
+    server := api.NewServer(":6969", store)
     server.Start()
 }

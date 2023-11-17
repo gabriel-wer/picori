@@ -19,8 +19,12 @@ func NewPostgre() *Postgre {
     return &Postgre{}
 }
 
-func (p *Postgre) GetURL(url *types.URL) {
-        p.db.QueryRow("SELECT longurl FROM url WHERE shorturl = $1", url.ShortURL).Scan(url.LongURL)
+func (p *Postgre) GetURL(url *types.URL) error {
+    err := p.db.QueryRow("SELECT longurl FROM url WHERE shorturl = $1", &url.ShortURL).Scan(&url.LongURL)
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
 
