@@ -6,6 +6,8 @@ import (
 	"fmt"
 )
 
+const HASH_SIZE = 9
+
 type URL struct { 
     ShortURL string `json:"shorturl"`
     LongURL string `json:"longurl"`
