@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-    store := storage.NewPostgre()
+    store := storage.NewSqlite()
     store.InitDB()
     defer func() {
         if err := store.Close(); err != nil {

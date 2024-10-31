@@ -7,9 +7,6 @@ import (
 	"github.com/gabriel-wer/picori/storage"
 	"github.com/gabriel-wer/picori/types"
 	errors "github.com/gabriel-wer/picori/util"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
 )
 
 
@@ -24,24 +21,14 @@ func NewServer(listenAddr string, store storage.Storage) *Server {
         store: store,
     }
 }
-
+ 
 func (s *Server) Start() error{
+    mux := http.NewServeMux()
+    mux.HandleFunc("POST /shorten", s.handleShorten)
+    mux.HandleFunc("POST /expand", s.handleExpand)
+    mux.HandleFunc("GET /{url}", s.handleRedirect)
 
-    corsMiddleware := cors.New(cors.Options{
-        AllowedOrigins: []string{"*"},
-        AllowedMethods: []string{"GET", "POST"},
-        AllowedHeaders: []string{"*"},
-    })
-    r := chi.NewRouter()
-    r.Use(corsMiddleware.Handler)
-    r.Use(middleware.Logger)
-
-
-    r.Post("/shorten", s.handleShorten)
-    r.Post("/expand", s.handleExpand)
-    r.Get("/{url}", s.handleRedirect)
-
-    return http.ListenAndServe(s.listenAddr, r)
+    return http.ListenAndServe(s.listenAddr, mux)
 }
 
 func (s *Server) handleShorten(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +50,6 @@ func (s *Server) handleShorten(w http.ResponseWriter, r *http.Request) {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
-
 
     w.WriteHeader(http.StatusOK)
     w.Write(errors.JsonData(w, url))
@@ -96,9 +82,8 @@ func (s *Server) handleExpand(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleRedirect(w http.ResponseWriter, r *http.Request) {
     var url types.URL
-    url.ShortURL = chi.URLParam(r, "url")
+    url.ShortURL = r.PathValue("url")
     //TODO: Fix redirects
-
     s.store.GetURL(&url)
     w.WriteHeader(http.StatusPermanentRedirect)
     http.Redirect(w, r, url.LongURL, 301)
