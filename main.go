@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/gabriel-wer/picori/api"
+	"github.com/gabriel-wer/picori/server"
 	"github.com/gabriel-wer/picori/storage"
 )
 
@@ -14,6 +14,6 @@ func main() {
         }
     }()
 
-    server := api.NewServer(":6969", store)
+    server := server.NewServer(":6969", store)
     server.Start()
 }

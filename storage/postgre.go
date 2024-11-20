@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gabriel-wer/picori/types"
+	"github.com/gabriel-wer/picori/picori"
     _ "github.com/lib/pq"
 )
 
@@ -19,7 +19,7 @@ func NewPostgre() *Postgre {
     return &Postgre{}
 }
 
-func (p *Postgre) GetURL(url *types.URL) error {
+func (p *Postgre) GetURL(url *picori.URL) error {
     err := p.db.QueryRow("SELECT longurl FROM url WHERE shorturl = $1", &url.ShortURL).Scan(&url.LongURL)
     if err != nil {
         return err
@@ -28,7 +28,7 @@ func (p *Postgre) GetURL(url *types.URL) error {
 }
 
 
-func (p *Postgre) InsertURL(url types.URL) error{
+func (p *Postgre) InsertURL(url picori.URL) error{
     _, err := p.db.Exec("INSERT INTO url (shorturl, longurl) VALUES ($1, $2)", url.ShortURL, url.LongURL)
     if err != nil {
         if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {

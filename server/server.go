@@ -1,14 +1,15 @@
-package api
+package server
 
 import (
 	"encoding/json"
 	"net/http"
 
 	"github.com/gabriel-wer/picori/storage"
-	"github.com/gabriel-wer/picori/types"
+	"github.com/gabriel-wer/picori/picori"
+    "github.com/gabriel-wer/picori/middleware"
+    "github.com/gabriel-wer/picori/auth"
 	errors "github.com/gabriel-wer/picori/util"
 )
-
 
 type Server struct {
     listenAddr string
@@ -24,15 +25,45 @@ func NewServer(listenAddr string, store storage.Storage) *Server {
  
 func (s *Server) Start() error{
     mux := http.NewServeMux()
+
     mux.HandleFunc("POST /shorten", s.handleShorten)
     mux.HandleFunc("POST /expand", s.handleExpand)
     mux.HandleFunc("GET /{url}", s.handleRedirect)
+    mux.HandleFunc("POST /login", s.handleLogin)
+    
+    midMux := middleware.Chain(mux, middleware.Logging)
 
-    return http.ListenAndServe(s.listenAddr, mux)
+    return http.ListenAndServe(s.listenAddr, midMux)
+}
+
+func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
+    username := r.FormValue("username")
+    password := r.FormValue("password")
+
+    if username == "" || password == "" {
+        http.Error(w, "Missing username or password", http.StatusBadRequest)
+        return
+    }
+
+    ldap, err := auth.NewLDAPConnection()
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusUnauthorized)
+        return
+    }
+
+    err = ldap.AuthenticateUser(username, password)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusUnauthorized)
+        return
+    }
+
+
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte("Welcome"))
 }
 
 func (s *Server) handleShorten(w http.ResponseWriter, r *http.Request) {
-    var url types.URL
+    var url picori.URL
 
     err := json.NewDecoder(r.Body).Decode(&url)
     if err != nil {
@@ -56,7 +87,7 @@ func (s *Server) handleShorten(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleExpand(w http.ResponseWriter, r *http.Request) {
-    var url types.URL
+    var url picori.URL
 
     err := json.NewDecoder(r.Body).Decode(&url)
     if err != nil {
@@ -81,7 +112,7 @@ func (s *Server) handleExpand(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleRedirect(w http.ResponseWriter, r *http.Request) {
-    var url types.URL
+    var url picori.URL
     url.ShortURL = r.PathValue("url")
     //TODO: Fix redirects
     s.store.GetURL(&url)

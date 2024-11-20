@@ -1,4 +1,4 @@
-package types
+package picori
 
 import (
 	"crypto/sha1"
