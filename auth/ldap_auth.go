@@ -39,7 +39,6 @@ func (s *LDAP) BindToLDAP() error {
         return fmt.Errorf("authentication failed: %v", err)
     }
 
-    fmt.Println("Authentication Successful")
     return nil
 }
 

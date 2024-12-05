@@ -31,16 +31,24 @@ func (s *Server) Start() error{
     mux.HandleFunc("GET /{url}", s.handleRedirect)
     mux.HandleFunc("POST /login", s.handleLogin)
     
-    midMux := middleware.Chain(mux, middleware.Logging)
+    midMux := middleware.Chain(mux, middleware.Logging,
+                                    middleware.CORS)
 
     return http.ListenAndServe(s.listenAddr, midMux)
 }
-
+type LoginForm struct {
+    Username string `json:"username"`
+    Password string `json:"password"`
+}
 func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
-    username := r.FormValue("username")
-    password := r.FormValue("password")
+    var login LoginForm
+    err := json.NewDecoder(r.Body).Decode(&login)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
 
-    if username == "" || password == "" {
+    if login.Username == "" || login.Password == "" {
         http.Error(w, "Missing username or password", http.StatusBadRequest)
         return
     }
@@ -51,7 +59,7 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    err = ldap.AuthenticateUser(username, password)
+    err = ldap.AuthenticateUser(login.Username, login.Password)
     if err != nil {
         http.Error(w, err.Error(), http.StatusUnauthorized)
         return
@@ -59,7 +67,7 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 
 
     w.WriteHeader(http.StatusOK)
-    w.Write([]byte("Welcome"))
+    w.Write([]byte(`{"message": "Welcome"}`))
 }
 
 func (s *Server) handleShorten(w http.ResponseWriter, r *http.Request) {
