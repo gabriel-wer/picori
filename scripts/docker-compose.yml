@@ -4,7 +4,7 @@ services:
   server:
     restart: always
     build:
-      context: ./
+      context: ../
       dockerfile: dockerfile
     volumes:
       - ./:/app
@@ -16,8 +16,6 @@ services:
       PICORI_PORT: '6969'
     ports:
       - 6969:6969
-    networks:
-      - backend
   db:
     image: postgres
     restart: always
@@ -26,8 +24,3 @@ services:
       POSTGRES_USER: 'picori'
     ports:
       - 5432:5432
-    networks:
-      - backend
-
-networks:
-  backend:

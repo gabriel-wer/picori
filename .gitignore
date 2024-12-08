@@ -27,3 +27,5 @@ rest/
 tmp/
 
 env
+
+*.db

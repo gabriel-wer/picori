@@ -1,10 +1,10 @@
 package storage
 
 import (
-	"github.com/gabriel-wer/picori/types"
+	"github.com/gabriel-wer/picori"
 )
 
 type Storage interface {
-    GetURL(*types.URL) error
-    InsertURL(types.URL) error
+	GetURL(*picori.URL) error
+	InsertURL(picori.URL) error
 }
