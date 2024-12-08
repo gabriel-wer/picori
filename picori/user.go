@@ -1,8 +1,14 @@
 package picori
 
+import "time"
+
 type User struct {
-    Id uint
-    Login string
-    Email string
-    Contact map[string]string
+    Id string
+    Username string
+    Created time.Time
+}
+
+type UserFilter struct {
+    Id string
+    Username string
 }

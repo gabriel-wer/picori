@@ -65,9 +65,15 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    cookie, err := auth.GenerateCookie()
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusUnauthorized)
+        return
+    }
 
     w.WriteHeader(http.StatusOK)
-    w.Write([]byte(`{"message": "Welcome"}`))
+    http.SetCookie(w, cookie)
+    w.Write([]byte(cookie.Value))
 }
 
 func (s *Server) handleShorten(w http.ResponseWriter, r *http.Request) {
