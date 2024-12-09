@@ -13,10 +13,10 @@ import (
 
 type Server struct {
 	listenAddr string
-	store      storage.Storage
+	store      *storage.Sqlite
 }
 
-func NewServer(listenAddr string, store storage.Storage) *Server {
+func NewServer(listenAddr string, store *storage.Sqlite) *Server {
 	return &Server{
 		listenAddr: listenAddr,
 		store:      store,
