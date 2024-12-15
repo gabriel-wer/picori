@@ -2,7 +2,9 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gabriel-wer/picori"
 	"github.com/gabriel-wer/picori/api/auth"
@@ -26,23 +28,26 @@ func NewServer(listenAddr string, store *storage.Sqlite) *Server {
 func (s *Server) Start() error {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("POST /shorten", s.handleShorten)
-	mux.HandleFunc("POST /expand", s.handleExpand)
-	mux.HandleFunc("GET /{url}", s.handleRedirect)
-	mux.HandleFunc("POST /login", s.handleLogin)
+	mux.HandleFunc("POST /v1/shorten", s.handleShorten)
+	mux.HandleFunc("POST /v1/expand", s.handleExpand)
+	mux.HandleFunc("GET /v1/{url}", s.handleRedirect)
+	mux.HandleFunc("POST /v1/login", s.handleLogin)
+	mux.HandleFunc("GET /v1/welcome", middleware.Authentication(s.handleWelcome, s.store))
 
-	midMux := middleware.Chain(mux, middleware.Logging,
-		middleware.CORS)
+	midMux := middleware.Chain(mux, middleware.CORS)
+	midMux = middleware.Logging(midMux)
 
 	return http.ListenAndServe(s.listenAddr, midMux)
 }
 
-type LoginForm struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+func (s *Server) handleWelcome(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("welcome"))
 }
-
 func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
+	type LoginForm struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
 	var login LoginForm
 	err := json.NewDecoder(r.Body).Decode(&login)
 	if err != nil {
@@ -67,15 +72,33 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookie, err := auth.GenerateCookie()
+	sessionID, err := auth.GenerateSessionID()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 
+	err = s.store.SaveCookie(login.Username, sessionID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	cookie := &http.Cookie{
+		Name:     "session_cookie",
+		Value:    sessionID,
+		Path:     "/",
+		Domain:   "localhost",
+		Expires:  time.Now().Add(24 * time.Hour),
+		MaxAge:   86400,
+		HttpOnly: true,
+		Secure:   true,
+	}
+
+	resp := fmt.Sprintf(`{"cookie": "%s" }`, cookie.Value)
 	w.WriteHeader(http.StatusOK)
 	http.SetCookie(w, cookie)
-	w.Write([]byte(cookie.Value))
+	w.Write([]byte(resp))
 }
 
 func (s *Server) handleShorten(w http.ResponseWriter, r *http.Request) {

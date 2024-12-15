@@ -22,3 +22,20 @@ func (s *Sqlite) CreateUser(user picori.User) error {
 
 	return nil
 }
+
+func (s *Sqlite) SaveCookie(username string, cookie string) error {
+	_, err := s.db.Exec("INSERT INTO sessions (username, session) VALUES ($1, $2);", username, cookie)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Sqlite) CheckCookie(session string) error {
+	var sessions string
+	err := s.db.QueryRow("Select * from sessions where session = $1", session).Scan(&sessions)
+	if err != nil {
+		return err
+	}
+	return nil
+}
