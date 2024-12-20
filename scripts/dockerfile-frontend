@@ -1,0 +1,7 @@
+FROM nginx:1.27.3-alpine
+
+WORKDIR ../
+
+COPY frontend/nginx.conf /etc/nginx/conf.d/blackbox.conf
+
+EXPOSE 80
