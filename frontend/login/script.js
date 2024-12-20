@@ -1,15 +1,15 @@
-document.getElementById("send").addEventListener("click", async function () {
+document.getElementById("send").addEventListener("click", async function() {
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
 
     try {
-        await fetch("/api/v1/login", {
+        await fetch("http://172.24.46.164:6969/v1/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({ username, password }),
-            credentials: "same-origin",
+            //credentials: "include",
         })
             .then((response) => {
                 console.log(response.status);

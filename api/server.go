@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gabriel-wer/picori"
@@ -37,7 +38,27 @@ func (s *Server) Start() error {
 	midMux := middleware.Chain(mux, middleware.CORS)
 	midMux = middleware.Logging(midMux)
 
+	go s.serveStatic()
 	return http.ListenAndServe(s.listenAddr, midMux)
+}
+
+func (s *Server) serveStatic() {
+	directoryPath := "./frontend/"
+
+	_, err := os.Stat(directoryPath)
+	if os.IsNotExist(err) {
+		fmt.Printf("Directory '%s' not found.\n", directoryPath)
+		return
+	}
+
+	fileServer := http.FileServer(http.Dir(directoryPath))
+
+	http.Handle("/", fileServer)
+
+	err = http.ListenAndServe(":8080", nil)
+	if err != nil {
+		fmt.Printf("Error starting server: %s\n", err)
+	}
 }
 
 func (s *Server) handleWelcome(w http.ResponseWriter, r *http.Request) {
