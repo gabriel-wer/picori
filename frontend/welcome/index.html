@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL List Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>List of URLs</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Short URL</th>
+                <th>Long URL</th>
+            </tr>
+        </thead>
+        <tbody id="url-table-body">
+            <!-- URLs will be dynamically injected here -->
+        </tbody>
+    </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('http://localhost:6969/v1/list', {
+                credentials: "include",
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('url-table-body');
+
+                    // Assuming the API returns an array of objects with 'shorturl' and 'longurl'
+                    data.forEach(item => {
+                        const row = document.createElement('tr');
+
+                        const shortUrlCell = document.createElement('td');
+                        const longUrlCell = document.createElement('td');
+
+                        const shortUrlLink = document.createElement('a');
+                        shortUrlLink.href = item.shorturl;
+                        shortUrlLink.textContent = item.shorturl;
+                        shortUrlLink.target = '_blank';
+
+                        const longUrlLink = document.createElement('a');
+                        longUrlLink.href = item.longurl;
+                        longUrlLink.textContent = item.longurl;
+                        longUrlLink.target = '_blank';
+
+                        shortUrlCell.appendChild(shortUrlLink);
+                        longUrlCell.appendChild(longUrlLink);
+
+                        row.appendChild(shortUrlCell);
+                        row.appendChild(longUrlCell);
+
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error fetching the URLs:', error));
+        });
+    </script>
+</body>
+
+</html>
