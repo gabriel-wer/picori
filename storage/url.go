@@ -13,6 +13,26 @@ func (s *Sqlite) GetURL(url *picori.URL) error {
 	return nil
 }
 
+func (s *Sqlite) ListURL() ([]picori.URL, error) {
+	var urls []picori.URL
+	rows, err := s.db.Query("SELECT longurl, shorturl FROM url")
+	if err != nil {
+		return []picori.URL{}, err
+	}
+    defer rows.Close()
+
+    for rows.Next() {
+        var url picori.URL
+        err = rows.Scan(&url.LongURL, &url.ShortURL)
+        if err != nil {
+            return []picori.URL{}, err
+        }
+        urls = append(urls, url)
+    }
+
+	return urls, nil
+}
+
 func (s *Sqlite) InsertURL(url picori.URL) error {
 	_, err := s.db.Exec("INSERT INTO url (shorturl, longurl) VALUES ($1, $2)", url.ShortURL, url.LongURL)
 	if err != nil {

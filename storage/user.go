@@ -33,7 +33,7 @@ func (s *Sqlite) SaveCookie(username string, cookie string) error {
 
 func (s *Sqlite) CheckCookie(session string) error {
 	var sessions string
-	err := s.db.QueryRow("Select * from sessions where session = $1", session).Scan(&sessions)
+	err := s.db.QueryRow("Select session from sessions where session = $1", session).Scan(&sessions)
 	if err != nil {
 		return err
 	}

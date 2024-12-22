@@ -20,22 +20,19 @@ func Chain(handler http.Handler, middlewares ...Middleware) http.Handler {
 
 func Logging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Capture the start time
 		start := time.Now()
 
-		// Call the next handler in the chain
 		next.ServeHTTP(w, r)
 
-		// Log the details after the request is processed
 		log.Printf("%s %s %s %v", r.Method, r.RequestURI, r.RemoteAddr, time.Since(start))
 	})
 }
 
 func CORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "*")
-		w.Header().Set("Access-Control-Allow-Headers", "*")
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTION")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 		if r.Method == http.MethodOptions {
@@ -49,15 +46,15 @@ func CORS(next http.Handler) http.Handler {
 
 func Authentication(next http.HandlerFunc, store *storage.Sqlite) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("session_cookie")
+		cookie, err := r.Cookie("cookayyy")
 		if err != nil {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			http.Error(w, "Unauthorized1", http.StatusUnauthorized)
 			return
 		}
 
 		err = store.CheckCookie(cookie.Value)
 		if err != nil {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			http.Error(w, "Unauthorized2", http.StatusUnauthorized)
 			return
 		}
 

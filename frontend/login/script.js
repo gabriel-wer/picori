@@ -3,13 +3,13 @@ document.getElementById("send").addEventListener("click", async function() {
     const password = document.getElementById("password").value;
 
     try {
-        await fetch("http://172.24.46.164:6969/v1/login", {
+        await fetch("http://localhost:6969/v1/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({ username, password }),
-            //credentials: "include",
+            credentials: "include",
         })
             .then((response) => {
                 console.log(response.status);

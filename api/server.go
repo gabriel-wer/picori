@@ -33,7 +33,7 @@ func (s *Server) Start() error {
 	mux.HandleFunc("POST /v1/expand", s.handleExpand)
 	mux.HandleFunc("GET /v1/{url}", s.handleRedirect)
 	mux.HandleFunc("POST /v1/login", s.handleLogin)
-	mux.HandleFunc("GET /v1/welcome", middleware.Authentication(s.handleWelcome, s.store))
+	mux.HandleFunc("GET /v1/list", middleware.Authentication(s.handleList, s.store))
 
 	midMux := middleware.Chain(mux, middleware.CORS)
 	midMux = middleware.Logging(midMux)
@@ -61,8 +61,21 @@ func (s *Server) serveStatic() {
 	}
 }
 
-func (s *Server) handleWelcome(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("welcome"))
+func (s *Server) handleList(w http.ResponseWriter, r *http.Request) {
+	urls, err := s.store.ListURL()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	jsonData, err := json.Marshal(urls)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
 }
 func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	type LoginForm struct {
@@ -106,19 +119,18 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookie := &http.Cookie{
-		Name:     "session_cookie",
+		Name:     "cookayyy",
 		Value:    sessionID,
 		Path:     "/",
-		Domain:   "localhost",
 		Expires:  time.Now().Add(24 * time.Hour),
 		MaxAge:   86400,
-		HttpOnly: true,
-		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+		Domain:   "localhost",
 	}
 
 	resp := fmt.Sprintf(`{"cookie": "%s" }`, cookie.Value)
-	w.WriteHeader(http.StatusOK)
 	http.SetCookie(w, cookie)
+	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(resp))
 }
 

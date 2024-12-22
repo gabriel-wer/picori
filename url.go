@@ -22,7 +22,7 @@ func (url *URL) Expand() error {
 }
 
 func (url *URL) Shorten() error {
-	if len(url.ShortURL) == 0 || len(url.LongURL) == 0 {
+	if len(url.LongURL) == 0 {
 		err := errors.New("You already have a shortened URL.")
 		return err
 	}
